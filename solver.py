@@ -1,27 +1,27 @@
 import pulp
-import pandas as pd
+import pandas as pdF
 
 def run_solver(df, limits_per_instrument, extra_regels):
 
-    df = df.dropna(subset=['Naam'])
+    df = df.dropna(subset=['Name'])
     
     # 1. DATA VOORBEREIDEN
     # Unieke ID maken voor elke rij (voor het geval Jan twee instrumenten speelt)
-    df['Resource_ID'] = df['Naam'].astype(str) + " (" + df['Instrument'].astype(str) + ")"
+    df['Resource_ID'] = df['Name'].astype(str) + " (" + df['Instrument'].astype(str) + ")"
     
     resources = df['Resource_ID'].tolist()
-    unieke_personen = df['Naam'].unique().tolist()
+    unieke_personen = df['Name'].unique().tolist()
     instrumenten = df['Instrument'].unique().tolist()
     
     # Bepaal de show kolommen (alles wat geen standaard kolom is)
-    vaste_kolommen = ['Naam', 'Instrument', 'Wens', 'Label', 'Resource_ID']
+    vaste_kolommen = ['Name', 'Instrument', 'Desired', 'Label', 'Resource_ID']
     momenten = [c for c in df.columns if c not in vaste_kolommen]
 
     # Lookups
     res_instr_map = df.set_index('Resource_ID')['Instrument'].to_dict()
-    res_naam_map = df.set_index('Resource_ID')['Naam'].to_dict()
+    res_naam_map = df.set_index('Resource_ID')['Name'].to_dict()
     # Wens (eerste wens die we vinden per persoon)
-    persoon_wens_map = df.groupby('Naam')['Wens'].first().to_dict()
+    persoon_wens_map = df.groupby('Name')['Desired'].first().to_dict()
 
     # 2. MODEL OPBOUWEN
     prob = pulp.LpProblem("Orkest_Planner", pulp.LpMaximize)
@@ -42,9 +42,8 @@ def run_solver(df, limits_per_instrument, extra_regels):
                 cijfer = 0 # Valback als het geen getal is
             
             waarde = 0
-            if cijfer == 3: waarde = 10
-            elif cijfer == 2: waarde = 5
-            elif cijfer == 1: waarde = -100
+            if cijfer == 2: waarde = 50
+            elif cijfer == 1: waarde = 1
             elif cijfer == 0: waarde = -10000 
             
             score += x[r, m] * waarde
@@ -131,7 +130,7 @@ def run_solver(df, limits_per_instrument, extra_regels):
                         alle_inzet.append(x[pid, show])
                 prob += pulp.lpSum(alle_inzet) >= min_aantal
         except Exception as e:
-            print(f"Fout bij regel {regel}: {e}")
+            print(f"Error for rule: {regel}: {e}")
 
     # 5. OPLOSSEN
     prob.solve()
@@ -142,7 +141,7 @@ def run_solver(df, limits_per_instrument, extra_regels):
     if status == "Optimal":
         for r in resources:
             row = {
-                'Naam': res_naam_map[r],
+                'Name': res_naam_map[r],
                 'Instrument': res_instr_map[r]
             }
             totaal = 0
@@ -152,7 +151,7 @@ def run_solver(df, limits_per_instrument, extra_regels):
                     totaal += 1
                 else:
                     row[m] = "."
-            row['Totaal'] = totaal
+            row['Total'] = totaal
             rooster_data.append(row)
     
-    return status, pd.DataFrame(rooster_data)
+    return status, pdF.DataFrame(rooster_data)

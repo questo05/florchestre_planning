@@ -5,7 +5,7 @@ import xlsxwriter
 from solver import run_solver
 
 # --- PAGINA CONFIGURATIE ---
-st.set_page_config(page_title="Orkest Planner", page_icon="🎻", layout="wide")
+st.set_page_config(page_title="FloResolve Planning", page_icon="🎻", layout="wide")
 
 # Verberg de link-icoontjes naast headers voor een strakker uiterlijk
 st.markdown("""
@@ -21,26 +21,26 @@ tab_setup, tab_planner = st.tabs(["🛠️ Admin Setup", "🎻 Planner"])
 # TAB 1: ADMIN SETUP
 # ==========================================
 with tab_setup:
-    st.header("Start een nieuw orkest-project")
-    st.write("Volg deze stappen om jouw eigen omgeving op te zetten:")
+    st.header("FloResolve Admin Setup")
+    st.write("Follow these steps to set up your environment:")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.info("Klik op de knop hieronder. Google vraagt je om een kopie te maken. Dit wordt JOUW formulier.")
-        st.subheader("Stap 1: Maak jouw Formulier")
+        st.info("Click on the red button below. Google will ask you to make a copy. This becomes the master file.")
+        st.subheader("Step 1: Make your form.")
         
         # Link om een kopie te maken van het Google Form
         master_form_link = "https://docs.google.com/forms/d/1cc3QyR7NvpHoLnNRuR-d-SUh3XzIhsFAwpBnFq-hYuM/copy"
         
-        st.link_button("📝 Maak mijn Google Formulier", master_form_link, type="primary")
+        st.link_button("📝 Make my google form", master_form_link, type="primary")
         
         st.markdown("""
-        **Wat moet ik doen?**
-        1. Klik de knop en kies **'Kopie maken'**.
-        2. Pas de titel aan (bv. "Zomerconcert 2026").
-        3. Klik in je nieuwe formulier rechtsboven op **'Verzenden'** 🔗.
-        4. Stuur die link naar je muzikanten.
+        **What do I do?**
+        1. Click the button and choose **make copy**.
+        2. Change the title (eg. "Winterconcert 2026").
+        3. In your new form, click in the top right corner on **Send** 🔗.
+        4. Send the link to your musicians.
         """)
 
     with col2:
@@ -49,54 +49,54 @@ with tab_setup:
         st.write("")
         st.write("") 
         st.write("")
-        st.subheader("Stap 2: Verzamel Antwoorden")
+        st.subheader("Step 2: Collect responses")
         st.write("") 
         st.write("")
-        st.write("Hebben je muzikanten ingevuld?")
+        st.write("Did all the musicians submit?")
         st.markdown("""
-        1. Ga naar je formulier.
-        2. Klik op **Antwoorden**.
-        3. Klik op het groene icoontje (Spreadsheets).
-        4. In Sheets: **Bestand** -> **Downloaden** -> **Excel (.xlsx)**.
-        5. Ga naar het tabblad **'Planner'** hierboven en upload dat bestand!
+        1. Go to your form.
+        2. Click **Answers**.
+        3. Click on the green icon (Spreadsheets).
+        4. In Sheets: **File** -> **Download** -> **Excel (.xlsx)**.
+        5. Continue to the tab **Planner** upload that excel!
         """)
     
-    st.success("Ga naar het tabblad 'Planner' om verder te gaan.")
+    st.success("Go to **Planner** to continue")
 
 # ==========================================
 # TAB 2: DE PLANNER
 # ==========================================
 with tab_planner:
-    st.title("🎻 Orkest Planner van Flore")
-    st.markdown("Upload één Excel met namen, instrumenten, wensen en scores (3=Graag, 2=Kan, 1=Liever niet, 0=Nee).")
+    st.title("🎻 FloResolve Planner")
+    st.markdown("Upload an Excel with names, instruments, desired and scores (2 = Available, 1 = If necessary, 0 = Not available).")
 
     # --- A. TEMPLATE BUILDER ---
-    with st.expander("🛠️ Genereer hier een leeg excel sjabloon (voor handmatige invoer)"):
-        st.write("Vul hier in hoe je orkest eruit ziet.")
+    with st.expander("🛠️ Generate an empty excel template (for manual input)"):
+        st.write("fill in here how the orchestra is arranged.")
         
-        num_shows = st.number_input("Aantal Shows/Projecten", min_value=1, value=1, step=1)
+        num_shows = st.number_input("Number of shows/projects", min_value=1, value=1, step=1)
         
         # Standaard tabelletje
         default_setup = pd.DataFrame([
-            {"Instrument": "Viool 1", "Aantal Muzikanten": 10},
-            {"Instrument": "Viool 2", "Aantal Muzikanten": 8},
-            {"Instrument": "Altviool", "Aantal Muzikanten": 6},
-            {"Instrument": "Cello", "Aantal Muzikanten": 6},
-            {"Instrument": "Contrabas", "Aantal Muzikanten": 4},
+            {"Instrument": "Violin 1", "Number of musicians": 10},
+            {"Instrument": "Violin 2", "Number of musicians": 10},
+            {"Instrument": "Viola", "Number of musicians": 6},
+            {"Instrument": "Cello", "Number of musicians": 6},
+            {"Instrument": "Double Bass", "Number of musicians": 4},
         ])
         
         config_df = st.data_editor(default_setup, num_rows="dynamic")
         
-        if st.button("Genereer mijn Excel-sjabloon"):
+        if st.button("Generate my excel template"):
             rows = []
             show_cols = [f"Show {i+1}" for i in range(num_shows)]
             
             for index, row in config_df.iterrows():
                 instr = row['Instrument']
-                count = int(row['Aantal Muzikanten'])
+                count = int(row['Number of musicians'])
                 
                 for i in range(count):
-                    new_row = {"Naam": f"Naam {i+1}", "Instrument": instr, "Wens": "-"}
+                    new_row = {"Name": f"Name {i+1}", "Instrument": instr, "Desired": "-"}
                     for show in show_cols:
                         new_row[show] = "-"
                     rows.append(new_row)
@@ -105,21 +105,21 @@ with tab_planner:
             
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                df_gen.to_excel(writer, index=False, sheet_name='Rooster')
+                df_gen.to_excel(writer, index=False, sheet_name='Planning')
             buffer.seek(0)
             
-            st.success(f"Gedaan! Een sjabloon met {len(df_gen)} muzikanten staat klaar.")
-            st.download_button("📥 Download Sjabloon", buffer, "Orkest_Data.xlsx")
+            st.success(f"Done! A template with {len(df_gen)} musicians is ready.")
+            st.download_button("📥 Download template", buffer, "Orchestra_Data.xlsx")
 
     # --- B. FILE UPLOAD ---
-    uploaded_file = st.file_uploader("Upload je Rooster Excel", type=['xlsx'])
+    uploaded_file = st.file_uploader("Upload your excel planning", type=['xlsx'])
 
     # !!! ALLES HIERONDER IS INGESPRONGEN OMDAT HET 'df' NODIG HEEFT !!!
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
 
         # --- DATA SCHOONMAAK ---
-        df = df.dropna(subset=['Naam', 'Instrument'])
+        df = df.dropna(subset=['Name', 'Instrument'])
         cols_to_drop = [c for c in df.columns if 'Tijdstempel' in c or 'Timestamp' in c]
         df = df.drop(columns=cols_to_drop, errors='ignore')
         
@@ -127,16 +127,16 @@ with tab_planner:
         df['Instrument'] = df['Instrument'].astype(str).str.split(', ')
         df = df.explode('Instrument')
         
-        required = ['Naam', 'Instrument', 'Wens']
+        required = ['Name', 'Instrument', 'Desired']
         if not all(col in df.columns for col in required):
-            st.error(f"Je Excel mist verplichte kolommen: {required}")
+            st.error(f"Your file is missing the following required columns: {required}")
             st.stop()
 
-        st.success("Bestand ingelezen! ✅")
+        st.success("File processed! ✅")
         
         # --- C. LIMIETEN INSTELLEN (ZIJBALK) ---
-        st.sidebar.header("🎛️ Bezetting")
-        st.sidebar.write("Hoeveel mensen mogen er max per show spelen?")
+        st.sidebar.header("🎛️ Capacity")
+        st.sidebar.write("How many musicians do you need per show?")
 
         instrumenten = df['Instrument'].unique()
         limits = {} 
@@ -144,7 +144,7 @@ with tab_planner:
         for instr in instrumenten:
             aantal_beschikbaar = len(df[df['Instrument'] == instr])
             limits[instr] = st.sidebar.number_input(
-                f"Max {instr}", 
+                f"Desired numer of {instr}s", 
                 min_value=0, 
                 max_value=aantal_beschikbaar, 
                 value=0,
@@ -155,17 +155,17 @@ with tab_planner:
         st.divider()
         col1, col2 = st.columns([1, 2])
         
-        niet_shows = ['Naam', 'Instrument', 'Wens', 'Label', 'Resource_ID', 'Totaal']
+        niet_shows = ['Name', 'Instrument', 'Desired', 'Label', 'Resource_ID', 'Totaal']
         shows = [c for c in df.columns if c not in niet_shows and c not in ['Tijdstempel', 'Timestamp']]
 
         with col1:
-            st.subheader("Extra Regels")
-            rule_type = st.selectbox("Type regel", 
+            st.subheader("Extra Rules")
+            rule_type = st.selectbox("Rule type", 
                                      ["-", 
-                                      "Niet Samen (Conflict)", 
-                                      "Altijd Samen", 
-                                      "Persoon doet ALLE shows",
-                                      "Persoon doet specifieke show"])
+                                      "Never Together (Conflict)", 
+                                      "Always Together", 
+                                      "Person plays ALL shows",
+                                      "Person plays specific show"])
 
             if 'regels' not in st.session_state:
                 st.session_state['regels'] = []
@@ -173,47 +173,38 @@ with tab_planner:
             regels = st.session_state['regels']
             
             # --- Invoer velden afhankelijk van regel type ---
-            if rule_type == "Persoon doet ALLE shows":
-                p1 = st.selectbox("Wie moet alles spelen?", df['Naam'].unique())
-                if st.button("Voeg Regel Toe"):
+            if rule_type == "Person plays ALL shows":
+                p1 = st.selectbox("Who has to play all shows?", df['Name'].unique())
+                if st.button("Add Rule"):
                     regels.append({'type': 'must_all', 'p1': p1})
                     st.session_state['regels'] = regels
-                    st.success(f"Regel: {p1} speelt alles.")
+                    st.success(f"Rule: {p1} plays all shows.")
 
-            elif rule_type == "Persoon doet specifieke show":
-                p1 = st.selectbox("Wie?", df['Naam'].unique())
-                target_show = st.selectbox("Welke show?", shows)
-                if st.button("Voeg Regel Toe"):
+            elif rule_type == "Person plays specific show":
+                p1 = st.selectbox("Who?", df['Name'].unique())
+                target_show = st.selectbox("Which show?", shows)
+                if st.button("Add Rule"):
                     regels.append({'type': 'force_show', 'p1': p1, 'show': target_show})
                     st.session_state['regels'] = regels
-                    st.success(f"Regel: {p1} doet {target_show}.")
-            
-            elif rule_type == "Minimaal aantal shows (Per Persoon)":
-                 p1 = st.selectbox("Wie?", df['Naam'].unique())
-                 max_shows_totaal = len(shows) 
-                 min_count = st.number_input("Minimum aantal shows", min_value=1, max_value=max_shows_totaal, value=1)
-                 if st.button("Voeg Regel Toe"):
-                    regels.append({'type': 'min_shows', 'p1': p1, 'count': min_count})
-                    st.session_state['regels'] = regels
-                    st.success(f"Regel: {p1} doet minimaal {min_count} shows.")
+                    st.success(f"Rule: {p1} will play {target_show}.")
 
             elif rule_type != "-": 
-                p1 = st.selectbox("Persoon 1", df['Naam'].unique())
-                p2 = st.selectbox("Persoon 2", df['Naam'].unique())
+                p1 = st.selectbox("Person 1", df['Name'].unique())
+                p2 = st.selectbox("Person 2", df['Name'].unique())
                 
                 if p1 != p2:
-                    if st.button("Voeg Regel Toe"):
-                        type_code = 'conflict' if "Niet" in rule_type else 'samen'
+                    if st.button("Add Rule"):
+                        type_code = 'conflict' if "Never" in rule_type else 'samen'
                         regels.append({'type': type_code, 'p1': p1, 'p2': p2})
                         st.session_state['regels'] = regels
-                        st.success("Regel toegevoegd!")
+                        st.success("Rule added!")
                 else:
                     if p1 == p2 and rule_type != "-":
-                         st.warning("Kies twee verschillende personen.")
+                         st.warning("Choose 2 different persons.")
 
         with col2:
             if regels:
-                st.write("**Actieve Regels:**")
+                st.write("**Active rules:**")
                 for i, r in enumerate(regels):
                     c_txt, c_btn = st.columns([4, 1])
                     with c_txt:
@@ -229,7 +220,7 @@ with tab_planner:
                             st.rerun()
                 
                 st.divider()
-                if st.button("Alles Wissen", type="secondary"):
+                if st.button("Clear all", type="secondary"):
                     st.session_state['regels'] = []
                     st.rerun()
 
@@ -237,8 +228,9 @@ with tab_planner:
         st.divider()
         
         # 1. Rekenwerk
-        if st.button("🚀 Genereer Planning", type="primary"):
-            with st.spinner("Puzzelen..."):
+        if st.button("🚀 Generate Schedule", type="primary"):
+
+            with st.spinner("Puzzling..."):
                 status, result = run_solver(df, limits, regels)
                 
                 # Opslaan in geheugen
@@ -268,10 +260,10 @@ with tab_planner:
                         export_df[col] = export_df[col].apply(lambda x: '✅' if x else '.')
 
                 with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                    export_df.to_excel(writer, index=False, sheet_name='Rooster')
+                    export_df.to_excel(writer, index=False, sheet_name='Planning')
                     
                     workbook = writer.book
-                    worksheet = writer.sheets['Rooster']
+                    worksheet = writer.sheets['Planning']
                     format_green = workbook.add_format({'bg_color': '#C6EFCE', 'font_color': '#006100', 'border': 1})
                     format_center = workbook.add_format({'align': 'center'})
                     
@@ -294,7 +286,7 @@ with tab_planner:
                 
                 volgorde_map = {naam: i for i, naam in enumerate(instrumenten)}
                 base_df['_sort_index'] = base_df['Instrument'].map(volgorde_map)
-                base_df = base_df.sort_values(by=['_sort_index', 'Naam'])
+                base_df = base_df.sort_values(by=['_sort_index', 'Name'])
                 base_df = base_df.drop(columns=['_sort_index'])
 
                 for col in shows:
@@ -308,37 +300,37 @@ with tab_planner:
                 
                 # HEADER MET KNOPPEN
                 c1, c2, c3 = st.columns([2, 1, 1])
-                with c1: st.subheader("Het Resultaat")
+                with c1: st.subheader("Result")
                 with c2: 
                     st.write("") 
                     buffer_orig = maak_excel(st.session_state['oplossing_df'], is_checkbox_data=False)
-                    st.download_button("📥 Origineel", buffer_orig, "Rooster_Origineel.xlsx", use_container_width=True)
+                    st.download_button("📥 Original", buffer_orig, "Planning_original.xlsx", use_container_width=True)
                 with c3:
                     st.write("") 
                     def reset_alles():
                         if 'bewerkte_df' in st.session_state: del st.session_state['bewerkte_df']
                         st.session_state['tabel_versie'] += 1
-                    st.button("🔄 Reset Wijzigingen", type="secondary", use_container_width=True, on_click=reset_alles)
+                    st.button("🔄 Reset Changes", type="secondary", use_container_width=True, on_click=reset_alles)
 
-                st.info("💡 **Batch Mode:** Je kunt hieronder het rooster aanpassen. Klik op **'Opslaan'** om te controleren.")
+                st.info("💡 **Edit Mode:** You can adjust the schedule below. Click **Check & Save Changes** to recheck the rules.")
 
                 column_config = {
-                    "Naam": st.column_config.TextColumn(disabled=True),
+                    "Name": st.column_config.TextColumn(disabled=True),
                     "Instrument": st.column_config.TextColumn(disabled=True),
-                    "Totaal": st.column_config.NumberColumn(disabled=True)
+                    "Total": st.column_config.NumberColumn(disabled=True)
                 }
                 for s in shows:
                     column_config[s] = st.column_config.CheckboxColumn(s, default=False)
 
                 # FORMULIER
-                with st.form("rooster_form"):
+                with st.form("schedule_form"):
                     current_key = f"editor_{st.session_state['tabel_versie']}"
                     edited_df = st.data_editor(
                         df_to_show, use_container_width=True, height=600,
                         key=current_key, column_config=column_config, hide_index=True
                     )
                     st.write("")
-                    submit_btn = st.form_submit_button("💾 Wijzigingen Controleren & Opslaan", type="primary")
+                    submit_btn = st.form_submit_button("💾 Check & Save Changes", type="primary")
 
                 # LOGICA NA OPSLAAN
                 if submit_btn:
@@ -352,13 +344,13 @@ with tab_planner:
                                 df_instr = edited_df[edited_df['Instrument'] == instr]
                                 count = df_instr[show].sum()
                                 if count > max_aantal:
-                                    fouten_log.append(f"⚠️ **Capaciteit:** Bij {show} zitten er **{count}** {instr}s (Max = {max_aantal}).")
+                                    fouten_log.append(f"⚠️ **Capacity:** In {show} there are **{count}** {instr}s (Instead of {max_aantal}).")
 
                     # --- CHECK 2: FYSIEKE ONMOGELIJKHEID (De Octopus Check 🐙) ---
                     # We kijken per persoon of hij/zij meer dan 1 vinkje heeft per show
-                    unieke_namen = edited_df['Naam'].unique()
+                    unieke_namen = edited_df['Name'].unique()
                     for naam in unieke_namen:
-                        persoon_rows = edited_df[edited_df['Naam'] == naam]
+                        persoon_rows = edited_df[edited_df['Name'] == naam]
                         for s in shows:
                             # Tel hoeveel vinkjes deze persoon in deze show heeft staan
                             aantal_instrumenten = persoon_rows[s].sum()
@@ -367,38 +359,38 @@ with tab_planner:
                                 # We zoeken even op welke instrumenten het zijn voor de duidelijkheid
                                 welke_instr = persoon_rows[persoon_rows[s]]['Instrument'].tolist()
                                 welke_str = " en ".join(welke_instr)
-                                fouten_log.append(f"🐙 **Onmogelijk:** {naam} speelt in {s} op **{aantal_instrumenten}** instrumenten tegelijk ({welke_str}).")
+                                fouten_log.append(f"🐙 **Double booking:** {naam} plays in {s} on **{aantal_instrumenten}** instruments at the same time ({welke_str}).")
 
                     # --- CHECK 3: REGELS (User Defined) ---
                     for r in regels:
                         try:
-                            p1_rows = edited_df[edited_df['Naam'] == r.get('p1')]
+                            p1_rows = edited_df[edited_df['Name'] == r.get('p1')]
                             
                             if r['type'] == 'conflict':
-                                p2_rows = edited_df[edited_df['Naam'] == r.get('p2')]
+                                p2_rows = edited_df[edited_df['Name'] == r.get('p2')]
                                 # Heeft P1 ergens een vinkje? EN P2 ook?
                                 p1_active = p1_rows[shows].any(axis=0)
                                 p2_active = p2_rows[shows].any(axis=0)
                                 if (p1_active & p2_active).any():
-                                    fouten_log.append(f"⚡ Conflict: {r['p1']} & {r['p2']} samen ingedeeld.")
+                                    fouten_log.append(f"⚡ Conflict: {r['p1']} & {r['p2']} scheduled together.")
 
                             elif r['type'] == 'samen':
-                                p2_rows = edited_df[edited_df['Naam'] == r.get('p2')]
+                                p2_rows = edited_df[edited_df['Name'] == r.get('p2')]
                                 p1_active = p1_rows[shows].any(axis=0)
                                 p2_active = p2_rows[shows].any(axis=0)
                                 if not p1_active.equals(p2_active):
-                                    fouten_log.append(f"🔗 Samen: {r['p1']} en {r['p2']} lopen niet gelijk.")
+                                    fouten_log.append(f"🔗 Together: {r['p1']} en {r['p2']} not scheduled together.")
 
                             elif r['type'] == 'must_all':
                                 p1_active_per_show = p1_rows[shows].any(axis=0)
                                 if not p1_active_per_show.all():
                                     missing_shows = p1_active_per_show[~p1_active_per_show].index.tolist()
-                                    fouten_log.append(f"🔒 **Verplicht:** {r['p1']} mist: {', '.join(missing_shows)}")
+                                    fouten_log.append(f"🔒 **Mandatory:** {r['p1']} is missing: {', '.join(missing_shows)}")
 
                             elif r['type'] == 'force_show':
                                 target = r['show']
                                 if not p1_rows[target].any():
-                                     fouten_log.append(f"📍 **Verplicht:** {r['p1']} mist in {target}.")
+                                     fouten_log.append(f"📍 **Mandatory:** {r['p1']} not scheduled in {target}.")
 
                             elif r['type'] == 'min_shows':
                                 count = p1_rows[shows].sum().sum()
@@ -409,46 +401,46 @@ with tab_planner:
 
                     # RESULTAAT TONEN
                     if fouten_log:
-                        st.error("🛑 **Let op! Regels overtreden:**")
+                        st.error("🛑 **Pay attention! Violated rules:**")
                         for f in fouten_log: st.write(f)
                     else:
-                        st.success("✅ Alles opgeslagen! Regels en limieten zijn in orde.")
+                        st.success("✅ Saved! Rules and limits are not violated.")
 
                     st.divider()
                     c_h, c_b = st.columns([3, 1])
-                    with c_h: st.subheader("Aangepaste Versie")
+                    with c_h: st.subheader("Your adapted version")
                     with c_b:
                          st.write("")
                          buffer_edit = maak_excel(edited_df, is_checkbox_data=True)
-                         st.download_button("📥 Download Aangepast", buffer_edit, "Rooster_Aangepast.xlsx")
+                         st.download_button("📥 Download Adapted Version", buffer_edit, "Schedule_adapted.xlsx")
 
                 # =========================================================
                 # 📧 MAIL MERGE BESTAND GENEREREN (NIEUW!)
                 # =========================================================
                 st.divider()
-                st.subheader("📧 E-mailen naar muzikanten")
+                st.subheader("📧 E-mail to musicians")
                 
                 # Check of er een e-mail kolom is
                 email_cols = [c for c in df.columns if 'mail' in c.lower()]
                 
                 if not email_cols:
-                    st.info("💡 Tip: Als je in je Excel een kolom 'Email' toevoegt, kan ik een verzendlijst maken.")
+                    st.info("💡 Hint: If you add a column 'Email' in your excel, this tool will make you a mailing list.")
                 else:
-                    st.write("Download hier een lijst die klaar is voor **Word Afdruk Samenvoegen**.")
+                    st.write("Download here a list ready for **Word Mail Merge**.")
                     email_col = email_cols[0]
                     
-                    if st.button("Genereer Verzendlijst"):
+                    if st.button("Generate mailing list"):
                         mailing_data = []
                         huidige_df = st.session_state['bewerkte_df']
-                        unieke_namen = huidige_df['Naam'].unique()
+                        unieke_namen = huidige_df['Name'].unique()
                         
                         for naam in unieke_namen:
-                            persoons_rijen = huidige_df[huidige_df['Naam'] == naam]
+                            persoons_rijen = huidige_df[huidige_df['Name'] == naam]
                             # Mailadres ophalen uit originele DF
                             try:
-                                email_adres = df[df['Naam'] == naam][email_col].iloc[0]
+                                email_adres = df[df['Name'] == naam][email_col].iloc[0]
                             except:
-                                email_adres = "Onbekend"
+                                email_adres = "Unknown"
                             
                             instrumenten_str = ", ".join(persoons_rijen['Instrument'].unique())
                             
@@ -458,10 +450,10 @@ with tab_planner:
                                 if persoons_rijen[s].any(): shows_te_spelen.append(s)
                             
                             mailing_data.append({
-                                "Naam": naam,
+                                "Name": naam,
                                 "Email": email_adres,
                                 "Instrument": instrumenten_str,
-                                "Rooster": ", ".join(shows_te_spelen) if shows_te_spelen else "Geen shows"
+                                "Schedule": ", ".join(shows_te_spelen) if shows_te_spelen else "No shows"
                             })
                         
                         mail_df = pd.DataFrame(mailing_data)
@@ -470,6 +462,6 @@ with tab_planner:
                             mail_df.to_excel(writer, index=False)
                         buffer_mail.seek(0)
                         
-                        st.download_button("📥 Download Verzendlijst", buffer_mail, "Verzendlijst.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                        st.download_button("📥 Download Mailing List", buffer_mail, "Mailinglist_Floresolve.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             else:
-                st.error("Kon geen oplossing vinden. Misschien zijn je regels te streng?")
+                st.error("Could not find a solution. Maybe your rules are too strict?")
