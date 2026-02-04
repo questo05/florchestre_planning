@@ -96,7 +96,7 @@ with tab_planner:
                 count = int(row['Number of musicians'])
                 
                 for i in range(count):
-                    new_row = {"Name": f"Name {i+1}", "Instrument": instr, "Desired": "-"}
+                    new_row = {"Name": f"Name {i+1}", "Instrument": instr, "E-mail": "-", "Desired": "-"}
                     for show in show_cols:
                         new_row[show] = "-"
                     rows.append(new_row)
@@ -466,3 +466,4 @@ with tab_planner:
             else:
 
                 st.error("Could not find a solution. Maybe your rules are too strict?")
+
