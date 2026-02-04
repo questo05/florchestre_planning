@@ -28,7 +28,7 @@ with tab_setup:
     
     with col1:
         st.info("Click on the red button below. Google will ask you to make a copy. This becomes the master file.")
-        st.subheader("Step 1: Make your form.")
+        st.subheader("Step 1: Make your form")
         
         # Link om een kopie te maken van het Google Form
         master_form_link = "https://docs.google.com/forms/d/1cc3QyR7NvpHoLnNRuR-d-SUh3XzIhsFAwpBnFq-hYuM/copy"
@@ -464,4 +464,5 @@ with tab_planner:
                         
                         st.download_button("📥 Download Mailing List", buffer_mail, "Mailinglist_Floresolve.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             else:
+
                 st.error("Could not find a solution. Maybe your rules are too strict?")
