@@ -68,7 +68,7 @@ with tab_setup:
 # ==========================================
 with tab_planner:
     st.title("🎻 FloResolve Planner")
-    st.markdown("Upload an Excel with names, instruments, desired and scores (2 = Available, 1 = If necessary, 0 = Not available).")
+    st.markdown("Upload an Excel with names, instruments, email, desired and scores (2 = Available, 1 = If necessary, 0 = Not available).")
 
     # --- A. TEMPLATE BUILDER ---
     with st.expander("🛠️ Generate an empty excel template (for manual input)"):
@@ -466,4 +466,5 @@ with tab_planner:
             else:
 
                 st.error("Could not find a solution. Maybe your rules are too strict?")
+
 
